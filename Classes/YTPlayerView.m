@@ -707,6 +707,11 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
   _webView = [self createNewWebView];
   [self addSubview:self.webView];
 
+    if ([[additionalPlayerParams objectForKey:@"playerVars"] objectForKey:@"origin"]) {
+        NSString *vegourl = [[additionalPlayerParams objectForKey:@"playerVars"] objectForKey:@"origin"];
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?v=%@", vegourl, [additionalPlayerParams objectForKey:@"videoId"]]];
+        [self.webView loadRequest:[NSURLRequest requestWithURL:url]];
+    } else {
   NSError *error = nil;
   NSString *path = [[NSBundle bundleForClass:[YTPlayerView class]] pathForResource:@"YTPlayerView-iframe-player"
                                                    ofType:@"html"
@@ -745,6 +750,7 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
 
   NSString *embedHTML = [NSString stringWithFormat:embedHTMLTemplate, playerVarsJsonString];
   [self.webView loadHTMLString:embedHTML baseURL: self.originURL];
+    }
   [self.webView setDelegate:self];
   self.webView.allowsInlineMediaPlayback = YES;
   self.webView.mediaPlaybackRequiresUserAction = NO;
