@@ -395,15 +395,30 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
 - (BOOL)webView:(UIWebView *)webView
     shouldStartLoadWithRequest:(NSURLRequest *)request
                 navigationType:(UIWebViewNavigationType)navigationType {
-  if ([request.URL.host isEqual: self.originURL.host]) {
+  if ([request.URL.host isEqual: self.originURL.host] || [request.URL.host containsString:@"youtube.com"]) {
     return YES;
   } else if ([request.URL.scheme isEqual:@"ytplayer"]) {
     [self notifyDelegateOfYouTubeCallbackUrl:request.URL];
     return NO;
+  } else if ([request.URL.host containsString:@"google.com"]) {
+      return NO;
   } else if ([request.URL.scheme isEqual: @"http"] || [request.URL.scheme isEqual:@"https"]) {
     return [self handleHttpNavigationToUrl:request.URL];
   }
   return YES;
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView
+{
+    if ([webView.request.URL.host containsString:@"m.youtube.com"]) {
+        webView.scrollView.contentOffset = CGPointMake(0, 46.0f);
+        NSString *str =
+        @"var script=document.createElement('script');"
+        "script.setAttribute('src','https://s3-ap-northeast-1.amazonaws.com/i.vego.tv/js/ios_video.js');"
+        "var body=document.getElementsByTagName('body')[0];"
+        "body.appendChild(script);";
+        [webView stringByEvaluatingJavaScriptFromString:str];
+    }
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
